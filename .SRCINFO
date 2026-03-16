@@ -1,0 +1,14 @@
+pkgbase = biotools-cli
+	pkgdesc = Read-only command line client for the bio.tools API
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://bio.tools
+	arch = any
+	license = MIT
+	checkdepends = python
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-setuptools
+	depends = python
+
+pkgname = biotools-cli

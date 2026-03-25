@@ -1,45 +1,41 @@
+<div align="center">
+
 # biotools-cli
 
-`biotools-cli` is a read-only command line client for the [bio.tools](https://bio.tools) API.
+[![Release](https://img.shields.io/github/v/release/decent-tools-for-thought/biotools-cli?sort=semver&color=0f766e)](https://github.com/decent-tools-for-thought/biotools-cli/releases)
+![Python](https://img.shields.io/badge/python-3.11%2B-0ea5e9)
+![License](https://img.shields.io/badge/license-MIT-14b8a6)
 
-It covers the informative endpoints from the bio.tools API reference:
+Read-only command-line client for the [bio.tools](https://bio.tools) API with explicit coverage of the informative public endpoints.
 
-- tool search and listing
-- tool detail lookup
-- used terms lookup
-- registry stats
-- domain listing
-- domain detail lookup
+</div>
 
-It deliberately does not implement authenticated or write operations.
+## Map
+- [Install](#install)
+- [Functionality](#functionality)
+- [Quick Start](#quick-start)
+- [Development](#development)
+- [Arch Packaging](#arch-packaging)
 
-## Installation
-
-```bash
-python -m pip install -e .
-```
-
-Arch Linux package build without `pip`:
+## Install
 
 ```bash
-sudo pacman -S --needed base-devel python-build python-installer python-setuptools
-makepkg -si
-```
-
-If you want to avoid `makepkg` attempting to install dependencies itself, install the makedepends first and then run:
-
-```bash
-makepkg -s
-sudo pacman -U ./biotools-cli-0.1.0-1-any.pkg.tar.zst
-```
-
-## Usage
-
-```bash
+python -m pip install .
 biotools --help
 ```
 
-Common examples:
+## Functionality
+
+- `biotools tools`: list and search tool records with the documented query filters.
+- `biotools tool <id>`: fetch one tool by `biotoolsID`.
+- `biotools terms <attribute>`: query the used-terms endpoints with compatibility aliases for the live API.
+- `biotools stats`: fetch registry-wide statistics.
+- `biotools domains` and `biotools domain <name>`: inspect domain records.
+- `biotools filters`: print the supported tool filter flags and their API parameter names.
+
+The CLI is intentionally read-only. It does not implement authenticated or write operations.
+
+## Quick Start
 
 ```bash
 biotools tools --name signalp --sort name --order asc
@@ -47,25 +43,39 @@ biotools tools --operation "Sequence analysis" --input-data-type "Protein sequen
 biotools tools --all --q blast --per-page 100
 biotools tool signalp
 biotools tool signalp --format xml
-biotools terms name
+biotools terms function-name
 biotools stats
 biotools domains
 biotools domain proteomics
 biotools filters
 ```
 
-## Notes
+Notes:
 
-- JSON responses are pretty-printed by default.
-- Use `--compact` for single-line JSON output.
+- JSON responses are pretty-printed by default; use `--compact` for single-line output.
 - Use `--exact KEY=VALUE` to force exact phrase matching for supported search parameters.
-- Parameters that bio.tools requires to be quoted are quoted automatically by the CLI.
-- The live `used-terms` API differs slightly from the published docs. The CLI accepts the documented names and maps them to the live-compatible endpoint names.
+- Query parameters that bio.tools requires to be quoted are quoted automatically.
+- The live `used-terms` API differs slightly from the published docs; the CLI maps documented aliases to the live endpoint names.
 - Use `--param KEY=VALUE` to pass through future or undocumented query parameters.
 
-## Arch Packaging Notes
+## Development
 
-- The repository includes a root `PKGBUILD` for local `makepkg` builds.
-- The package builds directly from the checked-out source tree.
-- It uses `python -m build` to create the wheel and `python -m installer` to stage files into the package root.
-- No `pip` step is used anywhere in the Arch packaging flow.
+```bash
+uv sync --group dev
+uv run ruff format .
+uv run ruff check .
+uv run mypy
+uv run pytest
+uv build
+```
+
+## Arch Packaging
+
+The repository includes a root `PKGBUILD` for local `makepkg` and eventual AUR publication.
+
+```bash
+sudo pacman -S --needed base-devel python-build python-installer python-setuptools
+makepkg -si
+```
+
+The package builds directly from the checked-out source tree with `python -m build` and stages files with `python -m installer`. No `pip` step is used in the Arch packaging flow.

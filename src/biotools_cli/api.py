@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
 import re
-from typing import Any, Iterable, Mapping
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
+from typing import Any
 
 from . import __version__
 
@@ -96,7 +97,11 @@ TOOL_FILTERS = (
     ToolFilterSpec("publication", "Search across publication identifiers and metadata."),
     ToolFilterSpec("publicationID", "Search by exact DOI, PMID, or PMCID.", must_quote=True),
     ToolFilterSpec("publicationType", "Search by exact publication type."),
-    ToolFilterSpec("publicationVersion", "Search by exact publication-associated tool version.", must_quote=True),
+    ToolFilterSpec(
+        "publicationVersion",
+        "Search by exact publication-associated tool version.",
+        must_quote=True,
+    ),
     ToolFilterSpec("link", "Search across general links."),
     ToolFilterSpec("linkType", "Search by exact link type."),
     ToolFilterSpec("documentation", "Search across documentation links."),
@@ -107,7 +112,11 @@ TOOL_FILTERS = (
     ToolFilterSpec("otherID", "Search across alternate tool identifiers."),
     ToolFilterSpec("otherIDValue", "Search by exact alternate identifier value.", must_quote=True),
     ToolFilterSpec("otherIDType", "Search by exact alternate identifier type."),
-    ToolFilterSpec("otherIDVersion", "Search by exact alternate identifier version.", must_quote=True),
+    ToolFilterSpec(
+        "otherIDVersion",
+        "Search by exact alternate identifier version.",
+        must_quote=True,
+    ),
     ToolFilterSpec("domain", "Filter results to a domain."),
 )
 
@@ -192,7 +201,9 @@ class BioToolsClient:
         if not params:
             return url
 
-        query = urllib.parse.urlencode([(key, str(value)) for key, value in params.items()], doseq=True)
+        query = urllib.parse.urlencode(
+            [(key, str(value)) for key, value in params.items()], doseq=True
+        )
         if not query:
             return url
 
@@ -213,7 +224,11 @@ class BioToolsClient:
                 raw = response.read()
                 charset = response.headers.get_content_charset() or "utf-8"
                 text = raw.decode(charset, errors="replace")
-                return ResponsePayload(url=url, content_type=response.headers.get("Content-Type", ""), text=text)
+                return ResponsePayload(
+                    url=url,
+                    content_type=response.headers.get("Content-Type", ""),
+                    text=text,
+                )
         except urllib.error.HTTPError as error:
             charset = error.headers.get_content_charset() if error.headers else None
             body = error.read().decode(charset or "utf-8", errors="replace").strip()
@@ -227,7 +242,9 @@ class BioToolsClient:
         try:
             return payload.json()
         except json.JSONDecodeError as error:
-            raise ApiError(f"Expected JSON response for {payload.url}, but the body could not be decoded.") from error
+            raise ApiError(
+                f"Expected JSON response for {payload.url}, but the body could not be decoded."
+            ) from error
 
     def _request_formatted(self, path: str, response_format: str = "json") -> Any:
         params = {"format": response_format} if response_format else None
@@ -282,7 +299,9 @@ class BioToolsClient:
 
     def list_used_terms(self, attribute: str, *, response_format: str = "json") -> Any:
         safe_attribute = urllib.parse.quote(attribute, safe="")
-        return self._request_formatted(f"used-terms/{safe_attribute}/", response_format=response_format)
+        return self._request_formatted(
+            f"used-terms/{safe_attribute}/", response_format=response_format
+        )
 
     def get_stats(self) -> Any:
         return self._request_json("stats")

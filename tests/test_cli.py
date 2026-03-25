@@ -6,7 +6,7 @@ import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
-from biotools_cli.cli import build_tool_query, handle_filters, main
+from biotools_cli.cli import build_tool_query, main
 
 
 class BuildToolQueryTests(unittest.TestCase):

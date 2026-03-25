@@ -1,0 +1,90 @@
+name: Release Verification
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to publish. Defaults to v<project version>.
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.release_meta.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Resolve release tag
+        id: release_meta
+        run: |
+          version="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          tag="${{ github.event.inputs.release_tag }}"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            tag="${GITHUB_REF_NAME}"
+          elif [ -z "$tag" ]; then
+            tag="v${version}"
+          fi
+          test "$tag" = "v${version}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Verify wheel install
+        run: |
+          python -m venv .venv-wheel
+          . .venv-wheel/bin/activate
+          pip install dist/*.whl
+          python -c "import biotools_cli; assert biotools_cli.__version__"
+          biotools --help
+
+      - name: Verify sdist install
+        run: |
+          python -m venv .venv-sdist
+          . .venv-sdist/bin/activate
+          pip install dist/*.tar.gz
+          python -c "import biotools_cli; assert biotools_cli.__version__"
+          biotools --help
+
+      - name: Generate checksums
+        run: sha256sum dist/* > dist/SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/*
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build-and-verify
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build-and-verify.outputs.release_tag }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/SHA256SUMS

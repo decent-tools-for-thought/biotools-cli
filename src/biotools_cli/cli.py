@@ -4,12 +4,11 @@ import argparse
 import json
 import sys
 import textwrap
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from . import __version__
 from .api import (
-    ApiError,
-    BioToolsClient,
     DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT,
     DETAIL_FORMATS,
@@ -18,6 +17,8 @@ from .api import (
     SORT_OPTIONS,
     TOOL_FILTERS,
     USED_TERM_ATTRIBUTES,
+    ApiError,
+    BioToolsClient,
     normalize_tool_params,
     resolve_used_term_endpoint,
 )
@@ -77,12 +78,33 @@ def build_parser() -> argparse.ArgumentParser:
         epilog="Use 'biotools filters' to see all supported tool search filters.",
         allow_abbrev=False,
     )
-    tools_parser.add_argument("--page", type=int, default=1, help="Result page number. Default: %(default)s")
-    tools_parser.add_argument("--per-page", type=int, default=50, help="Result page size. Default: %(default)s")
-    tools_parser.add_argument("--format", choices=LIST_FORMATS, default="json", help="Response format. Default: %(default)s")
+    tools_parser.add_argument(
+        "--page", type=int, default=1, help="Result page number. Default: %(default)s"
+    )
+    tools_parser.add_argument(
+        "--per-page", type=int, default=50, help="Result page size. Default: %(default)s"
+    )
+    tools_parser.add_argument(
+        "--format",
+        choices=LIST_FORMATS,
+        default="json",
+        help="Response format. Default: %(default)s",
+    )
     tools_parser.add_argument("--q", help="Full-text query across all indexed attributes.")
-    tools_parser.add_argument("--sort", choices=SORT_OPTIONS, default="lastUpdate", help="Sort field. Default: %(default)s")
-    tools_parser.add_argument("--order", "--ord", dest="ord", choices=ORDER_OPTIONS, default="desc", help="Sort direction. Default: %(default)s")
+    tools_parser.add_argument(
+        "--sort",
+        choices=SORT_OPTIONS,
+        default="lastUpdate",
+        help="Sort field. Default: %(default)s",
+    )
+    tools_parser.add_argument(
+        "--order",
+        "--ord",
+        dest="ord",
+        choices=ORDER_OPTIONS,
+        default="desc",
+        help="Sort direction. Default: %(default)s",
+    )
     tools_parser.add_argument(
         "--all",
         action="store_true",
@@ -107,7 +129,12 @@ def build_parser() -> argparse.ArgumentParser:
         help_text = spec.description
         if spec.must_quote:
             help_text += " The CLI quotes this value automatically because the API requires it."
-        tools_parser.add_argument(f"--{spec.option_name}", dest=spec.api_name, metavar="VALUE", help=help_text)
+        tools_parser.add_argument(
+            f"--{spec.option_name}",
+            dest=spec.api_name,
+            metavar="VALUE",
+            help=help_text,
+        )
 
     tools_parser.set_defaults(handler=handle_tools)
 
@@ -119,7 +146,12 @@ def build_parser() -> argparse.ArgumentParser:
         allow_abbrev=False,
     )
     tool_parser.add_argument("id", help="bio.tools tool identifier, for example 'signalp'.")
-    tool_parser.add_argument("--format", choices=DETAIL_FORMATS, default="json", help="Response format. Default: %(default)s")
+    tool_parser.add_argument(
+        "--format",
+        choices=DETAIL_FORMATS,
+        default="json",
+        help="Response format. Default: %(default)s",
+    )
     tool_parser.set_defaults(handler=handle_tool)
 
     terms_parser = subparsers.add_parser(
@@ -136,7 +168,12 @@ def build_parser() -> argparse.ArgumentParser:
             "Aliases accepted: function-name, function, operation, credit."
         ),
     )
-    terms_parser.add_argument("--format", choices=DETAIL_FORMATS, default="json", help="Response format. Default: %(default)s")
+    terms_parser.add_argument(
+        "--format",
+        choices=DETAIL_FORMATS,
+        default="json",
+        help="Response format. Default: %(default)s",
+    )
     terms_parser.set_defaults(handler=handle_terms)
 
     stats_parser = subparsers.add_parser(
@@ -165,7 +202,12 @@ def build_parser() -> argparse.ArgumentParser:
         allow_abbrev=False,
     )
     domain_parser.add_argument("name", help="Domain name or 'all'.")
-    domain_parser.add_argument("--format", choices=DETAIL_FORMATS, default="json", help="Response format. Default: %(default)s")
+    domain_parser.add_argument(
+        "--format",
+        choices=DETAIL_FORMATS,
+        default="json",
+        help="Response format. Default: %(default)s",
+    )
     domain_parser.set_defaults(handler=handle_domain)
 
     filters_parser = subparsers.add_parser(
@@ -219,7 +261,10 @@ def build_tool_query(args: argparse.Namespace) -> dict[str, str]:
     if args.per_page < 1:
         raise ValueError("--per-page must be at least 1.")
     if args.sort == "score" and not args.q:
-        raise ValueError("--sort score requires --q because the API only exposes score sorting for query searches.")
+        raise ValueError(
+            "--sort score requires --q because the API only exposes score sorting "
+            "for query searches."
+        )
 
     params: dict[str, Any] = {
         "page": args.page,
@@ -294,12 +339,20 @@ def handle_filters(_: argparse.Namespace) -> int:
     for spec in TOOL_FILTERS:
         quote_note = " [auto-quoted]" if spec.must_quote else ""
         lines.append(
-            f"  {spec.api_name:<{param_width}}  --{spec.option_name:<{option_width}}  {spec.description}{quote_note}"
+            
+                f"  {spec.api_name:<{param_width}}"
+                f"  --{spec.option_name:<{option_width}}"
+                f"  {spec.description}{quote_note}"
+            
         )
 
     lines.append("")
-    lines.append("Use '--exact KEY=VALUE' to force exact phrase matching for any supported parameter.")
-    lines.append("Use '--param KEY=VALUE' to pass additional raw query parameters through to the API.")
+    lines.append(
+        "Use '--exact KEY=VALUE' to force exact phrase matching for any supported parameter."
+    )
+    lines.append(
+        "Use '--param KEY=VALUE' to pass additional raw query parameters through to the API."
+    )
     print("\n".join(lines))
     return 0
 

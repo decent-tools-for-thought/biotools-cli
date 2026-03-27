@@ -10,14 +10,17 @@ Read-only command-line client for the [bio.tools](https://bio.tools) API with ex
 
 </div>
 
+> [!IMPORTANT]
+> This codebase is entirely AI-generated. It is useful to me, I hope it might be useful to others, and issues and contributions are welcome.
+
 ## Map
 - [Install](#install)
 - [Functionality](#functionality)
 - [Quick Start](#quick-start)
-- [Development](#development)
-- [Arch Packaging](#arch-packaging)
+- [Credits](#credits)
 
 ## Install
+$$\color{#0EA5E9}Install \space \color{#14B8A6}Tool$$
 
 ```bash
 python -m pip install .
@@ -25,6 +28,7 @@ biotools --help
 ```
 
 ## Functionality
+$$\color{#0EA5E9}Browse \space \color{#14B8A6}Registry$$
 
 - `biotools tools`: list and search tool records with the documented query filters.
 - `biotools tool <id>`: fetch one tool by `biotoolsID`.
@@ -36,6 +40,7 @@ biotools --help
 The CLI is intentionally read-only. It does not implement authenticated or write operations.
 
 ## Quick Start
+$$\color{#0EA5E9}Try \space \color{#14B8A6}Lookup$$
 
 ```bash
 biotools tools --name signalp --sort name --order asc
@@ -58,7 +63,7 @@ Notes:
 - The live `used-terms` API differs slightly from the published docs; the CLI maps documented aliases to the live endpoint names.
 - Use `--param KEY=VALUE` to pass through future or undocumented query parameters.
 
-## Development
+### Development
 
 ```bash
 uv sync --group dev
@@ -69,7 +74,7 @@ uv run pytest
 uv build
 ```
 
-## Arch Packaging
+### Arch Packaging
 
 The repository includes a root `PKGBUILD` for local `makepkg` and eventual AUR publication.
 
@@ -79,3 +84,9 @@ makepkg -si
 ```
 
 The package builds directly from the checked-out source tree with `python -m build` and stages files with `python -m installer`. No `pip` step is used in the Arch packaging flow.
+
+## Credits
+
+This client is built for the [bio.tools](https://bio.tools) API and is not affiliated with bio.tools.
+
+Credit goes to the bio.tools maintainers and ELIXIR community for the registry data, API, and documentation this tool depends on.

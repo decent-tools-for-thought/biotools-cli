@@ -7,7 +7,7 @@ name = "biotools-cli"
 version = "0.1.0"
 description = "Read-only command line client for the bio.tools API"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 authors = [
   { name = "OpenCode" },
 ]
@@ -56,7 +56,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.format]
 quote-style = "double"
@@ -65,7 +65,7 @@ quote-style = "double"
 select = ["E", "F", "I", "UP"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 files = ["src/biotools_cli", "tests"]
 strict = true
 

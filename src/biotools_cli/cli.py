@@ -4,8 +4,8 @@ import argparse
 import json
 import sys
 import textwrap
-from collections.abc import Sequence
-from typing import Any
+from collections.abc import Callable, Sequence
+from typing import Any, cast
 
 from . import __version__
 from .api import (
@@ -226,7 +226,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        return args.handler(args)
+        handler = cast(Callable[[argparse.Namespace], int], args.handler)
+        return handler(args)
     except (ApiError, ValueError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
@@ -339,11 +340,9 @@ def handle_filters(_: argparse.Namespace) -> int:
     for spec in TOOL_FILTERS:
         quote_note = " [auto-quoted]" if spec.must_quote else ""
         lines.append(
-            
-                f"  {spec.api_name:<{param_width}}"
-                f"  --{spec.option_name:<{option_width}}"
-                f"  {spec.description}{quote_note}"
-            
+            f"  {spec.api_name:<{param_width}}"
+            f"  --{spec.option_name:<{option_width}}"
+            f"  {spec.description}{quote_note}"
         )
 
     lines.append("")
